@@ -1,0 +1,15 @@
+*.pyc
+*.db
+*~
+.*
+*.py.bak
+/server/
+/build/
+/dist/
+/*.egg-info/
+/*env/
+!.github
+!.gitignore
+manage.py
+
+

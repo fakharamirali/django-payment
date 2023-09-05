@@ -1,0 +1,37 @@
+from setuptools import setup, find_packages
+
+setup(
+    name='nextpay',
+    version='1.0.0',
+    packages=find_packages(),
+    url='https://github.com/fakharamirali/nextpay.git',
+    license='BSD 3-Clause License',
+    author='Amirali Fakhar',
+    author_email='fakharamirali@gmail.com',
+    description='This library created for nextpay.org pay portal',
+    include_package_data=True,
+    python_requires=">=3.8",
+    install_requires=['django>=3.2'],
+    classifiers=[
+        'Development Status :: 1 - Planning',
+        'Framework :: Django',
+        'Framework :: Django :: 3.0',
+        'Framework :: Django :: 3.1',
+        'Framework :: Django :: 3.2',
+        'Framework :: Django :: 4.0',
+        'Framework :: Django :: 4.1',
+        'Framework :: Django :: 4.2',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
+
+)
