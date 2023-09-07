@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='nextpay',
+    name='payment',
     version='1.0.0',
     packages=find_packages(),
-    url='https://github.com/fakharamirali/nextpay.git',
+    url='https://github.com/fakharamirali/django-payment.git',
     license='BSD 3-Clause License',
     author='Amirali Fakhar',
     author_email='fakharamirali@gmail.com',
-    description='This library created for nextpay.org pay portal',
+    description='This library created for django payment portal',
     include_package_data=True,
     python_requires=">=3.8",
     install_requires=['django>=3.2'],

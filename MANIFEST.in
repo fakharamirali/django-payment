@@ -1,6 +1,6 @@
 include README.md
 include LICENSE.md
-recursive-include rest_framework/locale *.mo
-recursive-include nextpay *.py
+recursive-include payment/locale *.mo
+recursive-include payment *.py
 global-exclude __pycache__
 global-exclude *.py[co]

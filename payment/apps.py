@@ -2,7 +2,7 @@ from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 
 
-class NextpayApisConfig(AppConfig):
+class PaymentConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "nextpay.nextpay_apis"
-    verbose_name = _("Nextpay APIs")
+    name = "payment"
+    verbose_name = _('Payment')
