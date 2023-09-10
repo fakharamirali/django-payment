@@ -11,12 +11,10 @@ setup(
     description='This library created for django payment portal',
     include_package_data=True,
     python_requires=">=3.8",
-    install_requires=['django>=3.2'],
+    install_requires=['django>=3.2', 'requests>=2'],
     classifiers=[
         'Development Status :: 1 - Planning',
         'Framework :: Django',
-        'Framework :: Django :: 3.0',
-        'Framework :: Django :: 3.1',
         'Framework :: Django :: 3.2',
         'Framework :: Django :: 4.0',
         'Framework :: Django :: 4.1',
