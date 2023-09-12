@@ -41,7 +41,7 @@ class PayPortal(models.Model):
 class Transaction(models.Model):
     portal = models.ForeignKey('PayPortal', models.RESTRICT, verbose_name=_("Pay Portal"))
     user = models.ForeignKey(get_user_model(), None, related_name='transactions', related_query_name='transactions',
-                             verbose_name=_("User"))  # FIXME: ON DELETE
+                             verbose_name=_("User"), null=True, blank=True)  # FIXME: ON DELETE
     linked_contenttype = models.ForeignKey("contenttypes.ContentType", models.SET_NULL, verbose_name=_("Linked Model"),
                                            null=True, blank=True)
     linked_content_id = models.PositiveBigIntegerField(_("Linked Object Id"), null=True, blank=True)
