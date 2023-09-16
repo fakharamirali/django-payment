@@ -144,7 +144,7 @@ class BasePayPortalBackend:
         self.handle_verify(response)
         return self.transaction
     
-    def handle_verify(self, response: Response) -> StatusChoices:
+    def handle_verify(self, response: Response):
         """
         This method for handle response status of verify request
         Must override in children or define error mapping
@@ -153,7 +153,11 @@ class BasePayPortalBackend:
         :param: response: Response
         :return: StatusChoices
         """
-        raise NotImplementedError
+        if not self.ERROR_MAPPING or response.json().get('code') not in self.ERROR_MAPPING:
+            self.transaction.delete()
+            raise NotImplementedError
+        self.transaction.status = self.ERROR_MAPPING[response.json()['code']]
+        self.transaction.save()
     
     def send_verify_request(self) -> Response:
         if not self.URLs.get('VERIFY'):
@@ -175,11 +179,10 @@ class BasePayPortalBackend:
     
     def refund_transaction(self):
         response = self.send_refund_request()
-        self.handle_refund(self.transaction, response)
+        self.handle_refund(response)
         return self.transaction
-    
-    @classmethod
-    def handle_refund(cls, obj: Transaction, response: Response) -> StatusChoices:
+
+    def handle_refund(self, response: Response):
         """
         This method for handle response status of refund request
         Must override in children or define error mapping
@@ -188,7 +191,11 @@ class BasePayPortalBackend:
         :param: response: Response
         :return: StatusChoices
         """
-        raise NotImplementedError
+        if not self.ERROR_MAPPING or response.json().get('code') not in self.ERROR_MAPPING:
+            self.transaction.delete()
+            raise NotImplementedError
+        self.transaction.status = self.ERROR_MAPPING[response.json()['code']]
+        self.transaction.save()
     
     def send_refund_request(self) -> Response:
         if not self.URLs.get('REFUND'):
