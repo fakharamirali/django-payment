@@ -3,12 +3,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class StatusChoices(models.IntegerChoices):
-    refund_failed_by_lack_of_funds = -3, _("Refund failed by lake of funds")
-    refund_failed = -2, _("Refund Failed")
-    refunded = -1, _("Refunded")
-    successful = 0, _("Successful")
-    wait_for_pay = 1, _("Wait ...")
-    canceled = 2, _("Canceled")
-    wait_for_bank = 3, _("Wait for Bank")
-    canceled_by_user = 4, _("Canceled By User")
-    failed = 5, _("Failed")
+    REFUND_FAILED_BY_LACK_OF_FUNDS = -3, _("Refund failed by lake of funds")
+    REFUND_FAILED = -2, _("Refund Failed")
+    REFUNDED = -1, _("Refunded")
+    SUCCESSFUL = 0, _("Successful")
+    WAIT_FOR_PAY = 1, _("Wait ...")
+    CANCELED = 2, _("Canceled")
+    WAIT_FOR_BANK = 3, _("Wait for Bank")
+    CANCELED_BY_USER = 4, _("Canceled By User")
+    FAILED = 5, _("Failed")

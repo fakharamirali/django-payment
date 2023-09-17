@@ -50,7 +50,7 @@ class Transaction(models.Model):
         )
     
     portal = models.ForeignKey('PayPortal', models.RESTRICT, verbose_name=_("Pay Portal"))  # TODO: SET DEFAULT
-    transaction_id = models.UUIDField(_("Transaction ID"))
+    transaction_id = models.UUIDField(_("Transaction ID"), null=True)
     id = models.BigAutoField(_("Order ID"), primary_key=True)
     user = models.ForeignKey(get_user_model(), models.SET_NULL, related_name='transactions',
                              related_query_name='transactions',
