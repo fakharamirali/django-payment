@@ -3,12 +3,16 @@ from requests import Response
 from rest_framework.exceptions import ValidationError
 
 from .base import BasePayPortalBackend
+from ..decorator import register
 from ..models import Transaction
 from ..status import StatusChoices
 from ..validators import complete_card_number_regex
 
 
+@register
 class NextpayBackend(BasePayPortalBackend):
+    name = _("Nextpay")
+    
     URLs = {
         'CREATE': "https://nextpay.org/nx/gateway/token",
         "VERIFY": "https://nextpay.org/nx/gateway/verify",

@@ -24,6 +24,7 @@ class BasePayPortalBackend:
     def support_refund(cls):
         return cls.URLs.get('REFUND') is not None
     
+    name = None
     URLs = {}
     ERROR_MAPPING = {}
     
@@ -69,7 +70,7 @@ class BasePayPortalBackend:
             if portal.default_currency is None:
                 raise TypeError("You must set a currency if you don't have default currency")
             currency = portal.default_currency
-    
+
         transaction = Transaction(portal=portal, amount=amount, user=user, status=StatusChoices.WAIT_FOR_PAY,
                                   other=other, currency=currency, description=description)
         if linked_object is not None:
@@ -77,7 +78,7 @@ class BasePayPortalBackend:
         else:
             if linked_model is not None:
                 transaction.linked_contenttype = linked_model
-    
+
         response = cls.send_create_request(transaction, callback_uri, **kwargs)
         if not response.ok:
             return
@@ -113,12 +114,12 @@ class BasePayPortalBackend:
     def send_create_request(cls, transaction: Transaction, callback_uri, **kwargs) -> Response:
         if not cls.URLs.get("CREATE"):
             raise NotImplementedError("Define URLs['CREATE'] or override .send_create_request()")
-    
+
         try:
             URLValidator()(callback_uri)
         except ValidationError:
             raise ValueError("Callback URL is incorrect")
-    
+
         transaction.save()
         order_suffix = transaction.portal.order_id_prefix or transaction.portal.code_name
         data = {

@@ -1,7 +1,11 @@
 from django.utils.functional import SimpleLazyObject
 from django.utils.module_loading import import_string
 
-__all__ = ['PayPortalBackendRegistry', 'pay_portal_backend_registry', 'lazy_choices']
+__all__ = ['PayPortalBackendRegistry', 'pay_portal_backend_registry', 'lazy_choices', "AlreadyRegistered"]
+
+
+class AlreadyRegistered(Exception):
+    pass
 
 
 class PayPortalBackendRegistry:
@@ -12,11 +16,15 @@ class PayPortalBackendRegistry:
     def register(self, backend_class):
         """
         Register a payment backend in the registry by storing class name as key and import path as value
-        Update the choices list with the new backend
+        Update the choices list with the new backend's name and import path
         """
         backend_name = f"{backend_class.__module__}.{backend_class.__name__}"
+        
+        if backend_name in self._registry:
+            raise AlreadyRegistered(f"The backend '{backend_name}' is already registered.")
+        
         self._registry[backend_class.__name__] = backend_name
-        self._choices.add((backend_name, backend_name))
+        self._choices.add((backend_class.name, backend_name))
     
     def unregister(self, backend_class):
         """
@@ -44,6 +52,13 @@ class PayPortalBackendRegistry:
         Get the choices for the CharField dynamically from the registry with import paths as values
         """
         return list(self._choices)
+    
+    def is_registered(self, backend_class):
+        """
+        Check if a payment backend is already registered.
+        """
+        backend_name = f"{backend_class.__module__}.{backend_class.__name__}"
+        return backend_name in self._registry
 
 
 # Create an instance of the registry class
