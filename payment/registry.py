@@ -8,10 +8,14 @@ class AlreadyRegistered(Exception):
     pass
 
 
+class NotRegistered(Exception):
+    pass
+
+
 class PayPortalBackendRegistry:
     def __init__(self):
         self._registry = {}
-        self._choices = set()
+        self._choices = []
     
     def register(self, backend_class):
         """
@@ -24,7 +28,7 @@ class PayPortalBackendRegistry:
             raise AlreadyRegistered(f"The backend '{backend_name}' is already registered.")
         
         self._registry[backend_class.__name__] = backend_name
-        self._choices.add((backend_class.name, backend_name))
+        self._choices.append((backend_name, backend_class.name))
     
     def unregister(self, backend_class):
         """
@@ -32,9 +36,21 @@ class PayPortalBackendRegistry:
         Remove the backend from the choices list
         """
         backend_name = f"{backend_class.__module__}.{backend_class.__name__}"
-        if backend_class.__name__ in self._registry:
-            del self._registry[backend_class.__name__]
-            self._choices.discard((backend_name, backend_name))
+        
+        if backend_class.__name__ not in self._registry:
+            raise NotRegistered(f"The backend '{backend_name}' is not registered.")
+        
+        del self._registry[backend_class.__name__]
+        backend_to_remove = (backend_name, backend_class.name)
+        if backend_to_remove in self._choices:
+            self._choices.remove(backend_to_remove)
+    
+    def is_registered(self, backend_class):
+        """
+        Check if a payment backend is already registered.
+        """
+        backend_name = f"{backend_class.__module__}.{backend_class.__name__}"
+        return backend_name in self._registry
     
     def get_backend(self, backend_name):
         """
@@ -49,16 +65,9 @@ class PayPortalBackendRegistry:
     @property
     def choices(self):
         """
-        Get the choices for the CharField dynamically from the registry with import paths as values
+        Get the choices for the CharField dynamically from the registry with (name, import path) tuples
         """
-        return list(self._choices)
-    
-    def is_registered(self, backend_class):
-        """
-        Check if a payment backend is already registered.
-        """
-        backend_name = f"{backend_class.__module__}.{backend_class.__name__}"
-        return backend_name in self._registry
+        return self._choices
 
 
 # Create an instance of the registry class
