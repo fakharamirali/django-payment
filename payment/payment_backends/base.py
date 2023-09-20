@@ -7,11 +7,12 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import URLValidator
 from django.db.models import Model
 from django.db.models.base import ModelBase
+from django.utils.timezone import now
 from requests import Response
 from rest_framework.generics import get_object_or_404
 
 from payment.models import PayPortal, Transaction
-from payment.status import StatusChoices
+from payment.status import StatusChoices, HARD_FAILED_STATUSES, FAIL_MESSAGES
 
 __all__ = ['CURRENCY_TYPE', 'BasePayPortalBackend']
 
@@ -71,8 +72,8 @@ class BasePayPortalBackend:
                 raise TypeError("You must set a currency if you don't have default currency")
             currency = portal.default_currency
 
-        transaction = Transaction(portal=portal, amount=amount, user=user, status=StatusChoices.WAIT_FOR_PAY,
-                                  other=other, currency=currency, description=description)
+        transaction = Transaction(portal=portal, amount=amount, user=user, other=other, currency=currency,
+                                  description=description)
         if linked_object is not None:
             transaction.linked_content_object = linked_object
         else:
@@ -82,7 +83,6 @@ class BasePayPortalBackend:
         response = cls.send_create_request(transaction, callback_uri, **kwargs)
         if not response.ok:
             return
-        transaction.save()
         cls.handle_create(transaction, response)
         return transaction
     
@@ -98,15 +98,19 @@ class BasePayPortalBackend:
         :return: StatusChoices
         """
         if not cls.ERROR_MAPPING:
-            transaction.delete()
+            if transaction.pk:
+                transaction.delete()
             raise NotImplementedError
 
         res_data = response.json()
-        transaction.status = cls.ERROR_MAPPING.get(res_data['code'], StatusChoices.REFUND_FAILED)
+        transaction.status = cls.ERROR_MAPPING.get(res_data['code'], StatusChoices.FAILED)
 
-        if transaction.status == StatusChoices.FAILED:
-            transaction.delete()
-            raise ValueError("Uncaught code")
+        if transaction.status is None or transaction.status in HARD_FAILED_STATUSES:
+            if transaction.pk:
+                transaction.delete()
+            if transaction is None:
+                raise ValueError("Uncaught code")
+            raise FAIL_MESSAGES[transaction.status]
         transaction.transaction_id = res_data[cls.TRANSACTION_ID_KEY_NAME]
         transaction.save()
 
@@ -119,8 +123,7 @@ class BasePayPortalBackend:
             URLValidator()(callback_uri)
         except ValidationError:
             raise ValueError("Callback URL is incorrect")
-
-        transaction.save()
+        transaction.locate_id()
         order_suffix = transaction.portal.order_id_prefix or transaction.portal.code_name
         data = {
             cls.API_KEY_NAME: str(transaction.portal.api_key),
@@ -131,8 +134,6 @@ class BasePayPortalBackend:
             **cls.get_create_context(transaction, **kwargs)
         }
         response = requests.post(cls.URLs["CREATE"], data=data, headers=cls.get_headers(portal=transaction.portal))
-        if not response.ok:
-            transaction.delete()
         return response
 
     @classmethod
@@ -165,6 +166,7 @@ class BasePayPortalBackend:
         if not self.ERROR_MAPPING:
             raise NotImplementedError
         self.transaction.status = self.ERROR_MAPPING[response.json()['code']]
+        self.transaction.last_verify = now()
         self.transaction.save()
     
     def send_verify_request(self) -> Response:
@@ -199,10 +201,10 @@ class BasePayPortalBackend:
         :param: response: Response
         :return: StatusChoices
         """
-        if not self.ERROR_MAPPING or response.json().get('code') not in self.ERROR_MAPPING:
-            self.transaction.delete()
+        if not self.ERROR_MAPPING:
             raise NotImplementedError
         self.transaction.status = self.ERROR_MAPPING.get(response.json()['code'], StatusChoices.REFUND_FAILED)
+        self.transaction.last_verify = now()
         self.transaction.save()
     
     def send_refund_request(self) -> Response:

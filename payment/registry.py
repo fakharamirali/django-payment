@@ -1,7 +1,8 @@
 from django.utils.functional import SimpleLazyObject
 from django.utils.module_loading import import_string
 
-__all__ = ['PayPortalBackendRegistry', 'pay_portal_backend_registry', 'lazy_choices', "AlreadyRegistered"]
+__all__ = ['PayPortalBackendRegistry', 'pay_portal_backend_registry', 'lazy_choices', "AlreadyRegistered",
+           "NotRegistered"]
 
 
 class AlreadyRegistered(Exception):

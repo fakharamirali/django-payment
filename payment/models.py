@@ -3,10 +3,11 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.validators import StepValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Q
+from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 
-from payment import registry
+from payment import registry, globals
 from payment.status import StatusChoices
 from payment.validators import card_holder_validator, number_only_validator
 
@@ -28,7 +29,7 @@ class PayPortal(models.Model):
     class Meta:
         verbose_name = _("Pay Portal")
         verbose_name_plural = _("Pay Portals")
-    
+
         permissions = [
             ("secret", _("Access secret data of pay portal")),
         ]
@@ -81,7 +82,7 @@ class Transaction(models.Model):
     card_holder = models.CharField(_("Card Number"), max_length=19,
                                    validators=(card_holder_validator,))
     shaparak_tracking_code = models.CharField(_("Tracking Code"), max_length=12, validators=(number_only_validator,))
-    status = models.PositiveSmallIntegerField(_("Status"), choices=StatusChoices.choices)
+    status = models.SmallIntegerField(_("Status"), choices=StatusChoices.choices)
     description = models.TextField(_("Description"), null=True, blank=True)
     other = models.JSONField(_("Other Information"), null=True, blank=True)
 
@@ -91,7 +92,10 @@ class Transaction(models.Model):
     last_verify = models.DateTimeField(_("Last verify"), null=True)
     last_edit = models.DateTimeField(_("Last Edit"), auto_now=True)
 
-    def get_backend_controller(self):
+    # Functional methods
+
+    @cached_property
+    def backend_controller(self):
         return self.portal.get_backend()(self)
 
     def create(self, portal: PayPortal, callback_uri, **kwargs):
@@ -103,3 +107,23 @@ class Transaction(models.Model):
         response = portal.get_backend().send_create_request(transaction=self, callback_uri=callback_uri, **kwargs)
         portal.get_backend().handle_create(self, response)
         return self
+
+    def verify(self):
+        self.backend_controller.verify_transaction()
+
+    def refund(self):
+        self.backend_controller.refund_transaction()
+
+    # Other
+
+    @classmethod
+    def get_next_available_id(cls):
+    
+        max_id = globals.max_used_id_transaction
+        return (max_id + 1) if max_id else 1
+
+    def locate_id(self):
+        self.id = self.get_next_available_id()
+
+    def get_redirect_url(self):
+        return self.backend_controller.get_redirect_url()
