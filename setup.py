@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='payment',
-    version='1.0.0',
+    name='django-payment',
+    version='0.0.0',
     packages=find_packages(),
     url='https://github.com/fakharamirali/django-payment.git',
     license='BSD 3-Clause License',
@@ -13,7 +13,7 @@ setup(
     python_requires=">=3.8",
     install_requires=['django>=3.2', 'requests>=2'],
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 2 - Pre-Alpha',
         'Framework :: Django',
         'Framework :: Django :: 3.2',
         'Framework :: Django :: 4.0',
