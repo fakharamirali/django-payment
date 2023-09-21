@@ -11,6 +11,7 @@ from django.utils.timezone import now
 from requests import Response
 from rest_framework.generics import get_object_or_404
 
+from payment import signals
 from payment.models import PayPortal, Transaction
 from payment.status import StatusChoices, HARD_FAILED_STATUSES, FAIL_MESSAGES
 
@@ -71,7 +72,6 @@ class BasePayPortalBackend:
             if portal.default_currency is None:
                 raise TypeError("You must set a currency if you don't have default currency")
             currency = portal.default_currency
-
         transaction = Transaction(portal=portal, amount=amount, user=user, other=other, currency=currency,
                                   description=description)
         if linked_object is not None:
@@ -79,11 +79,13 @@ class BasePayPortalBackend:
         else:
             if linked_model is not None:
                 transaction.linked_contenttype = linked_model
-
+        signals.pre_create_transaction.send(cls, transaction=transaction, callback_uri=callback_uri)
         response = cls.send_create_request(transaction, callback_uri, **kwargs)
         if not response.ok:
+            signals.create_transaction_failed.send(cls, request=response, transaction=transaction)
             return
         cls.handle_create(transaction, response)
+        signals.post_create_transaction.send(cls, transaction=transaction)
         return transaction
     
     @classmethod
@@ -150,8 +152,10 @@ class BasePayPortalBackend:
     # -------------------------------------- VERIFY --------------------------------------------
     
     def verify_transaction(self):
+        signals.pre_verify_transaction.send(self.__class__, transaction=self.transaction)
         response = self.send_verify_request()
         self.handle_verify(response)
+        signals.post_verify_transaction.send(self.__class__, transaction=self.transaction)
         return self.transaction
     
     def handle_verify(self, response: Response):
@@ -188,8 +192,10 @@ class BasePayPortalBackend:
     # ------------------------------------ REFUND -----------------------------------------------
     
     def refund_transaction(self):
+        signals.pre_refund_transaction.send(self.__class__, transaction=self.transaction)
         response = self.send_refund_request()
         self.handle_refund(response)
+        signals.post_refund_transaction.send(self.__class__, transaction=self.transaction, response=response)
         return self.transaction
 
     def handle_refund(self, response: Response):
