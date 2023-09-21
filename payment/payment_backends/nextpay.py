@@ -1,3 +1,4 @@
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from requests import Response
 from rest_framework.exceptions import ValidationError
@@ -61,6 +62,7 @@ class NextpayBackend(BasePayPortalBackend):
         if status == StatusChoices.SUCCESSFUL:
             self.transaction.card_holder = data['card_holder']
             self.transaction.shaparak_tracking_code = data['Shaparak_Ref_Id']
+        self.transaction.last_verify = now()
         self.transaction.save()
     
     def get_refund_context(self):

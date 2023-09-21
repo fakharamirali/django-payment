@@ -7,7 +7,7 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 
-from payment import registry, globals
+from payment import registry, globals, signals
 from payment.status import StatusChoices
 from payment.validators import card_holder_validator, number_only_validator
 
@@ -104,8 +104,11 @@ class Transaction(models.Model):
                 raise TypeError("You must set a currency if you don't have default currency")
             self.currency = portal.default_currency
         self.portal = portal
+        signals.pre_create_transaction.send(sender=portal.get_backend(), transaction=self, callback_uri=callback_uri)
         response = portal.get_backend().send_create_request(transaction=self, callback_uri=callback_uri, **kwargs)
         portal.get_backend().handle_create(self, response)
+        signals.post_create_transaction.send(sender=portal.get_backend(), transaction=self, callback_uri=callback_uri,
+                                             response=response)
         return self
 
     def verify(self):
