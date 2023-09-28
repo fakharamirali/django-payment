@@ -27,6 +27,9 @@ class TransactionViewSet(mixins.RetrieveModelMixin,
             if obj.linked_contenttype is not None:
                 if hasattr(obj.linked_contenttype.model_class(), "on_transaction_successful") and callable(
                         obj.linked_contenttype.model_class().on_transaction_successful):
-                    obj.linked_contenttype.model_class().on_transaction_successful(self)
+                    try:
+                        obj.linked_contenttype.model_class().on_transaction_successful(obj, request)
+                    except Exception:
+                        pass
         
         return self.retrieve(request, *args, **kwargs)

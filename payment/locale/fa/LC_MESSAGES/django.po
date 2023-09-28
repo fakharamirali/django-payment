@@ -19,75 +19,75 @@ msgstr ""
 
 #: .\payment\apps.py:11
 msgid "Payment"
-msgstr ""
+msgstr "پرداخت"
 
 #: .\payment\models.py:16
 msgid "Not set Default"
-msgstr ""
+msgstr "پیش فرض تنظیم نشده"
 
 #: .\payment\models.py:17
 msgid "Rial"
-msgstr ""
+msgstr "ريال"
 
 #: .\payment\models.py:18
 msgid "Toman"
-msgstr ""
+msgstr "تومان"
 
 #: .\payment\models.py:30 .\payment\models.py:69
 msgid "Pay Portal"
-msgstr ""
+msgstr "درگاه پرداخت"
 
 #: .\payment\models.py:31
 msgid "Pay Portals"
-msgstr ""
+msgstr "درگاه های پرداخت"
 
 #: .\payment\models.py:34
 msgid "Access secret data of pay portal"
-msgstr ""
+msgstr "دسترسی به اطلاعات امنیتی درگاه پرداخت"
 
 #: .\payment\models.py:39
 msgid "Name"
-msgstr ""
+msgstr "نام"
 
 #: .\payment\models.py:40
 msgid "Code Name"
-msgstr ""
+msgstr "کد"
 
 #: .\payment\models.py:40
 msgid "This name use to access from code and don't show user"
-msgstr ""
+msgstr "این نام برای دسترسی در نرم افزار استفاده می شود و به کاربر نشان داده نمی شود"
 
 #: .\payment\models.py:42
 msgid "Backend"
-msgstr ""
+msgstr "نوع درگاه"
 
 #: .\payment\models.py:43
 msgid "API Key"
-msgstr ""
+msgstr "کلید API"
 
 #: .\payment\models.py:45
 msgid "Order Prefix"
-msgstr ""
+msgstr "پیشوند سفارش"
 
 #: .\payment\models.py:46
 msgid "Default Currency"
-msgstr ""
+msgstr "واحد پولی پیش فرض"
 
 #: .\payment\models.py:55
 msgid "Transaction"
-msgstr ""
+msgstr "تراکنش"
 
 #: .\payment\models.py:56
 msgid "Transactions"
-msgstr ""
+msgstr "تراکنش ها"
 
 #: .\payment\models.py:62
 msgid "Can Create a new Transaction"
-msgstr ""
+msgstr "آیا می تواند یک تراکنش بسازد"
 
 #: .\payment\models.py:63
 msgid "Can verify a transaction with check"
-msgstr ""
+msgstr "آیا می تواند تراکنش را مجددا بررسی کند"
 
 #: .\payment\models.py:64
 msgid "Can set it paid without check"
