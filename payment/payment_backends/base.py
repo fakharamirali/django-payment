@@ -12,6 +12,7 @@ from requests import Response
 from rest_framework.generics import get_object_or_404
 
 from payment import signals
+from payment.exceptions import FailedPaymentError
 from payment.models import PayPortal, Transaction
 from payment.status import StatusChoices, HARD_FAILED_STATUSES, FAIL_MESSAGES
 
@@ -112,7 +113,7 @@ class BasePayPortalBackend:
                 transaction.delete()
             if transaction is None:
                 raise ValueError("Uncaught code")
-            raise FAIL_MESSAGES[transaction.status]
+            raise FailedPaymentError(FAIL_MESSAGES[transaction.status])
         transaction.transaction_id = res_data[cls.TRANSACTION_ID_KEY_NAME]
         transaction.save()
 

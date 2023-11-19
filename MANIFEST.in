@@ -4,3 +4,4 @@ recursive-include payment/locale *.mo
 recursive-include payment *.py
 global-exclude __pycache__
 global-exclude *.py[co]
+recursive-exclude server *

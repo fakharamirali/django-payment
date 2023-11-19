@@ -98,7 +98,11 @@ class Transaction(models.Model):
     def backend_controller(self):
         return self.portal.get_backend()(self)
 
-    def create(self, portal: PayPortal, callback_uri, **kwargs):
+    def create(self, callback_uri, portal: PayPortal = None, **kwargs):
+        if portal is None:
+            if self.portal is None:
+                raise TypeError("You must set portal in the transaction instance or pass it to this function")
+            portal = self.portal
         if self.currency is None:
             if portal.default_currency is None:
                 raise TypeError("You must set a currency if you don't have default currency")
