@@ -7,9 +7,9 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import URLValidator
 from django.db.models import Model
 from django.db.models.base import ModelBase
+from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from requests import Response
-from rest_framework.generics import get_object_or_404
 
 from payment import signals
 from payment.exceptions import FailedPaymentError
@@ -26,24 +26,24 @@ class BasePayPortalBackend:
     @classmethod
     def support_refund(cls):
         return cls.URLs.get('REFUND') is not None
-    
+
     name = None
     URLs = {}
     ERROR_MAPPING = {}
-    
+
     # API Key in pay portal send to pay portal by this key name
     # Must override if pay portal use other key name
     API_KEY_NAME = "api_key"
-    
+
     # Transaction ID send to pay portal by this key name
     # Must override
     TRANSACTION_ID_KEY_NAME = 'trans_id'
-    
+
     def __init__(self, transaction: Transaction):
         self.transaction = transaction
-    
+
     # ------------------------------------- CREATE ------------------------------------------------
-    
+
     @classmethod
     def create(cls, portal: "PayPortal", amount: int, callback_uri: str, user: "User|None" = None,
                linked_model: "ContentType|ModelBase|None" = None, description: str = None,
@@ -58,7 +58,7 @@ class BasePayPortalBackend:
                         linked_model.get_object_for_this_type(pk=linked_object)
                     except ObjectDoesNotExist:
                         pass
-                
+
                 if not isinstance(linked_object, Model):
                     raise TypeError(
                         "You must set linked_object a model instance ot define linked_model and set linked_object "
@@ -88,7 +88,7 @@ class BasePayPortalBackend:
         cls.handle_create(transaction, response)
         signals.post_create_transaction.send(cls, transaction=transaction)
         return transaction
-    
+
     @classmethod
     def handle_create(cls, transaction: Transaction, response: Response):
         """
@@ -147,18 +147,18 @@ class BasePayPortalBackend:
         :return: A dict include additional data to send to pay portal
         """
         raise NotImplementedError
-    
+
     # ------------------------------------ END CREATE ------------------------------------------
-    
+
     # -------------------------------------- VERIFY --------------------------------------------
-    
+
     def verify_transaction(self):
         signals.pre_verify_transaction.send(self.__class__, transaction=self.transaction)
         response = self.send_verify_request()
         self.handle_verify(response)
         signals.post_verify_transaction.send(self.__class__, transaction=self.transaction)
         return self.transaction
-    
+
     def handle_verify(self, response: Response):
         """
         This method for handle response status of verify request
@@ -173,13 +173,13 @@ class BasePayPortalBackend:
         self.transaction.status = self.ERROR_MAPPING[response.json()['code']]
         self.transaction.last_verify = now()
         self.transaction.save()
-    
+
     def send_verify_request(self) -> Response:
         if not self.URLs.get('VERIFY'):
             raise NotImplementedError("Define URLs['VERIFY'] or override .send_verify_request()")
         data = self.get_verify_context()
         return requests.post(self.URLs['VERIFY'], data=data, headers=self.get_headers(self.transaction.portal))
-    
+
     def get_verify_context(self):
         return {
             self.API_KEY_NAME: self.transaction.portal.api_key,
@@ -187,11 +187,11 @@ class BasePayPortalBackend:
             'amount': self.transaction.amount,
             'currency': self.transaction.currency,
         }
-    
+
     # ----------------------------------- END VERIFY -------------------------------------------
-    
+
     # ------------------------------------ REFUND -----------------------------------------------
-    
+
     def refund_transaction(self):
         signals.pre_refund_transaction.send(self.__class__, transaction=self.transaction)
         response = self.send_refund_request()
@@ -213,18 +213,18 @@ class BasePayPortalBackend:
         self.transaction.status = self.ERROR_MAPPING.get(response.json()['code'], StatusChoices.REFUND_FAILED)
         self.transaction.last_verify = now()
         self.transaction.save()
-    
+
     def send_refund_request(self) -> Response:
         if not self.URLs.get('REFUND'):
             raise NotImplementedError("Define URLs['REFUND'] or override .send_refund_request()")
         data = self.get_refund_context()
         return requests.post(self.URLs['REFUND'], data=data, headers=self.get_headers(self.transaction.portal))
-    
+
     def get_refund_context(self):
         raise NotImplementedError
-    
+
     # ----------------------------------- END REFUND ------------------------------------------------
-    
+
     # ------------------------------------- OTHER ---------------------------------------------------
 
     def get_redirect_url(self):
