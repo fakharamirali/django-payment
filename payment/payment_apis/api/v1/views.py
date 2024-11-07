@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -5,6 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from payment.models import Transaction
 from payment.status import StatusChoices
 from ... import serializers
+
+logger = logging.getLogger(__name__)
 
 
 class TransactionViewSet(mixins.RetrieveModelMixin,
@@ -14,10 +18,10 @@ class TransactionViewSet(mixins.RetrieveModelMixin,
         IsAuthenticated
     ]
     serializer_class = serializers.TransactionSerializer
-    
+
     def get_queryset(self):
         return Transaction.objects.filter(user=self.request.user)
-    
+
     @action(detail=True, url_path="verify", url_name="verify")
     def verify(self, request, *args, **kwargs):
         obj: Transaction = self.get_object()
@@ -29,7 +33,7 @@ class TransactionViewSet(mixins.RetrieveModelMixin,
                         obj.linked_contenttype.model_class().on_transaction_successful):
                     try:
                         obj.linked_contenttype.model_class().on_transaction_successful(obj, request)
-                    except Exception:
-                        pass
-        
+                    except Exception as e:
+                        logger.warning(str(e), exc_info=True)
+
         return self.retrieve(request, *args, **kwargs)

@@ -1,1 +1,2 @@
 wheel>=0.37
+setuptools
