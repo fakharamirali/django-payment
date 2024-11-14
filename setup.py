@@ -1,4 +1,4 @@
-from requests import __version__
+from payment import __version__
 from setuptools import setup, find_packages
 
 setup(
