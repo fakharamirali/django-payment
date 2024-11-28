@@ -33,6 +33,10 @@ class ZibalBackend(BasePayPortalBackend):
         102: status.StatusChoices.API_KEY_INVALID,
         103: status.StatusChoices.API_KEY_INVALID,
         104: status.StatusChoices.API_KEY_INVALID,
+        201: status.StatusChoices.SUCCESSFUL,
+        202: status.StatusChoices.FAILED,
+        203: status.StatusChoices.TRANSITION_ID_INVALID,
+        114: status.StatusChoices.CANCELED
     }
 
     TRANSLATE_DICTIONARY = BasePayPortalBackend.TRANSLATE_DICTIONARY | {

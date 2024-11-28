@@ -185,7 +185,7 @@ class BasePayPortalBackend:
         data: dict = response.json()
         status = self.ERROR_MAPPING.get(self.get_status(data))
         if status is None:
-            raise FailedPaymentError(status)
+            raise FailedPaymentError(self.get_status(data))
         self.transaction.status = status
         self.apply_to_transaction(data=data)
         self.transaction.last_verify = now()
