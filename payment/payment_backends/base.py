@@ -107,7 +107,7 @@ class BasePayPortalBackend:
     def send_create_request(self, callback_uri, **kwargs) -> Response:
 
         if not self.URLS.get("CREATE"):
-            raise NotImplementedError("Define URLs['CREATE'] or override .send_create_request()")
+            raise NotImplementedError("Define URLS['CREATE'] or override .send_create_request()")
         else:
             url = self.URLS["CREATE"]
         if kwargs.get('auto_verify') and 'AUTO_VERIFY_CREATE' in self.URLS:
@@ -193,7 +193,7 @@ class BasePayPortalBackend:
 
     def send_verify_request(self) -> Response:
         if not self.URLS.get('VERIFY'):
-            raise NotImplementedError("Define URLs['VERIFY'] or override .send_verify_request()")
+            raise NotImplementedError("Define URLS['VERIFY'] or override .send_verify_request()")
         data = self.get_verify_context()
         return requests.post(self.URLS['VERIFY'], json=data, headers=self.get_headers())
 
@@ -232,7 +232,7 @@ class BasePayPortalBackend:
 
     def send_refund_request(self) -> Response:
         if not self.URLS.get('REFUND'):
-            raise NotImplementedError("Define URLs['REFUND'] or override .send_refund_request()")
+            raise NotImplementedError("Define URLS['REFUND'] or override .send_refund_request()")
         data = self.get_refund_context()
         return requests.post(self.URLS['REFUND'], json=data, headers=self.get_headers())
 
@@ -245,7 +245,7 @@ class BasePayPortalBackend:
 
     def get_redirect_url(self):
         if not self.URLS.get('REDIRECT'):
-            raise NotImplementedError("Define URLs['REDIRECT'] or override .send_redirect_request()")
+            raise NotImplementedError("Define URLS['REDIRECT'] or override .send_redirect_request()")
         return self.URLS['REDIRECT'].format(transaction=self.transaction)
 
     @classmethod
