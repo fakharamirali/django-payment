@@ -1,35 +1,57 @@
-from typing import Literal
+import logging
 
 import requests
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
-from django.db.models import Model
-from django.db.models.base import ModelBase
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from requests import Response
 
 from payment import signals
 from payment.exceptions import FailedPaymentError
-from payment.models import PayPortal, Transaction
-from payment.status import StatusChoices, HARD_FAILED_STATUSES, FAIL_MESSAGES
+from payment.models import Transaction
+from payment.status import FAIL_MESSAGES, HARD_FAILED_STATUSES, StatusChoices
 
-__all__ = ['CURRENCY_TYPE', 'BasePayPortalBackend']
+__all__ = ['BaseBackend']
 
-CURRENCY_TYPE = Literal['IRR', "IRT", None]
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
-class BasePayPortalBackend:
+class BaseBackend:
     @classmethod
     def support_refund(cls):
-        return cls.URLs.get('REFUND') is not None
+        return cls.URLS.get('REFUND') is not None
 
     name = None
-    URLs = {}
+    URLS = {}
     ERROR_MAPPING = {}
+    TRANSLATE_DICTIONARY = {
+        'card_holder': 'card_holder',
+        'allowed_card': 'allowed_card',
+        'auto_verify': 'auto_verify',
+        'phone': 'phone',
+        'shaparak_tracking_code': 'shaparak_tracking_code',
+        'national_code': 'national_code',
+        'check_mobile_number': 'check_mobile_number',
+        'callback_uri': 'callback_uri',
+        'amount': 'amount',
+        'order_id': 'order_id',
+        'description': 'description'
+    }
+    REQUEST_FLAGS = [
+        'allowed_card',
+        'auto_verify',
+        'phone',
+        'national_code',
+        'check_mobile_number',
+        'description'
+    ]
+    RECEIVING_FLAGS = [
+        'card_holder',
+        'shaparak_tracking_code',
+    ]
 
     # API Key in pay portal send to pay portal by this key name
     # Must override if pay portal use other key name
@@ -38,59 +60,25 @@ class BasePayPortalBackend:
     # Transaction ID send to pay portal by this key name
     # Must override
     TRANSACTION_ID_KEY_NAME = 'trans_id'
+    STATUS_FIELD = 'code'
 
     def __init__(self, transaction: Transaction):
         self.transaction = transaction
 
     # ------------------------------------- CREATE ------------------------------------------------
 
-    @classmethod
-    def create(cls, portal: "PayPortal", amount: int, callback_uri: str, user: "User|None" = None,
-               linked_model: "ContentType|ModelBase|None" = None, description: str = None,
-               linked_object=None, currency: CURRENCY_TYPE = None, other: dict = None,
-               **kwargs) -> "Transaction | None":
-        if isinstance(linked_model, ModelBase):
-            linked_model = ContentType.objects.get_for_model(linked_model)
-        if linked_object is not None:
-            if not isinstance(linked_object, Model):
-                if linked_model is not None:
-                    try:
-                        linked_model.get_object_for_this_type(pk=linked_object)
-                    except ObjectDoesNotExist:
-                        pass
+    def create(self, callback_url, **kwargs) -> bool:
 
-                if not isinstance(linked_object, Model):
-                    raise TypeError(
-                        "You must set linked_object a model instance ot define linked_model and set linked_object "
-                        "valid pk")
-            else:
-                if linked_model is not None:
-                    if not isinstance(linked_object, linked_model.model_class()):
-                        raise TypeError(
-                            "If you set linked_model and linked_object together! if you set both, the type of object "
-                            "must be linked_model")
-        if currency is None:
-            if portal.default_currency is None:
-                raise TypeError("You must set a currency if you don't have default currency")
-            currency = portal.default_currency
-        transaction = Transaction(portal=portal, amount=amount, user=user, other=other, currency=currency,
-                                  description=description)
-        if linked_object is not None:
-            transaction.linked_content_object = linked_object
-        else:
-            if linked_model is not None:
-                transaction.linked_contenttype = linked_model
-        signals.pre_create_transaction.send(cls, transaction=transaction, callback_uri=callback_uri)
-        response = cls.send_create_request(transaction, callback_uri, **kwargs)
+        signals.pre_create_transaction.send(self.__class__, transaction=self.transaction, callback_uri=callback_url)
+        response = self.send_create_request(callback_url, **kwargs)
         if not response.ok:
-            signals.create_transaction_failed.send(cls, request=response, transaction=transaction)
-            return
-        cls.handle_create(transaction, response)
-        signals.post_create_transaction.send(cls, transaction=transaction)
-        return transaction
+            signals.create_transaction_failed.send(self.__class__, request=response, transaction=self.transaction)
+            return False
+        self.handle_create(response)
+        signals.post_create_transaction.send(self.__class__, transaction=self.transaction)
+        return True
 
-    @classmethod
-    def handle_create(cls, transaction: Transaction, response: Response):
+    def handle_create(self, response: Response):
         """
         This method for handle response status of create request
         Must override in children or define error mapping
@@ -100,53 +88,78 @@ class BasePayPortalBackend:
         :param: response: Response
         :return: StatusChoices
         """
-        if not cls.ERROR_MAPPING:
-            if transaction.pk:
-                transaction.delete()
+        if not self.ERROR_MAPPING:
+            if self.transaction.pk:
+                self.transaction.delete()
             raise NotImplementedError
 
-        res_data = response.json()
-        transaction.status = cls.ERROR_MAPPING.get(res_data['code'], StatusChoices.FAILED)
+        result = response.json()
+        self.transaction.status = self.ERROR_MAPPING.get(self.get_status(result), StatusChoices.FAILED)
 
-        if transaction.status is None or transaction.status in HARD_FAILED_STATUSES:
-            if transaction.pk:
-                transaction.delete()
-            if transaction is None:
+        if self.transaction.status is None or self.transaction.status in HARD_FAILED_STATUSES:
+            if self.transaction.pk:
+                self.transaction.delete()
+            if self.transaction is None:
                 raise ValueError("Uncaught code")
-            raise FailedPaymentError(FAIL_MESSAGES[transaction.status])
-        transaction.transaction_id = res_data[cls.TRANSACTION_ID_KEY_NAME]
-        transaction.save()
+            raise FailedPaymentError(FAIL_MESSAGES[self.transaction.status])
+        self.transaction.transaction_id = result[self.TRANSACTION_ID_KEY_NAME]
+        self.transaction.save()
 
-    @classmethod
-    def send_create_request(cls, transaction: Transaction, callback_uri, **kwargs) -> Response:
-        if not cls.URLs.get("CREATE"):
-            raise NotImplementedError("Define URLs['CREATE'] or override .send_create_request()")
+    def send_create_request(self, callback_uri, **kwargs) -> Response:
+
+        if not self.URLS.get("CREATE"):
+            raise NotImplementedError("Define URLS['CREATE'] or override .send_create_request()")
+        else:
+            url = self.URLS["CREATE"]
+        if kwargs.get('auto_verify') and 'AUTO_VERIFY_CREATE' in self.URLS:
+            url = self.URLS["AUTO_VERIFY_CREATE"]
+            kwargs.pop('auto_verify')
 
         try:
             URLValidator()(callback_uri)
         except ValidationError:
             raise ValueError("Callback URL is incorrect")
-        transaction.locate_id()
-        order_suffix = transaction.portal.order_id_prefix or transaction.portal.code_name
+        self.transaction.locate_id()
+        order_suffix = self.transaction.portal.order_id_prefix or self.transaction.portal.code_name
         data = {
-            cls.API_KEY_NAME: str(transaction.portal.api_key),
-            'order_id': f"{order_suffix}_{transaction.id}",
-            'amount': transaction.amount,
-            'callback_uri': callback_uri,
-            'currency': transaction.currency,
-            **cls.get_create_context(transaction, **kwargs)
+            self.API_KEY_NAME: str(self.transaction.portal.api_key),
+            self.translate_flag('order_id'): f"{order_suffix}_{self.transaction.id}",
+            self.translate_flag('amount'): self.transaction.amount,
+            self.translate_flag('callback_uri'): callback_uri,
+            **self.get_create_context(**kwargs)
         }
-        response = requests.post(cls.URLs["CREATE"], data=data, headers=cls.get_headers(portal=transaction.portal))
+        params = {
+            'url': url,
+            'json': data,
+        }
+        if headers := self.get_headers():
+            params['headers'] = headers
+        response = requests.post(**params)
         return response
 
-    @classmethod
-    def get_create_context(cls, transaction: Transaction, **kwargs):
+    def get_create_context(self, **kwargs):
         """
         This function get transaction and return data that will send additional to default data
-        :param transaction: Transaction
         :return: A dict include additional data to send to pay portal
         """
-        raise NotImplementedError
+        context = {}
+        for flag in self.REQUEST_FLAGS:
+            value = None
+            if flag in kwargs:
+                value = kwargs[flag]
+            elif hasattr(self.transaction, flag):
+                value = getattr(self.transaction, flag)
+            elif self.transaction.user:
+                if hasattr(self.transaction.user, flag):
+                    value = getattr(self.transaction.user, flag)
+                elif hasattr(self.transaction.user, "get_" + flag) and callable(
+                        getattr(self.transaction.user, 'get_' + flag)):
+                    value = getattr(self.transaction.user, "get_" + flag)()
+            if value is not None:
+                translated_flag = self.translate_flag(flag)
+                context[translated_flag] = value
+
+        return context
 
     # ------------------------------------ END CREATE ------------------------------------------
 
@@ -170,22 +183,25 @@ class BasePayPortalBackend:
         """
         if not self.ERROR_MAPPING:
             raise NotImplementedError
-        self.transaction.status = self.ERROR_MAPPING[response.json()['code']]
+        data: dict = response.json()
+        status = self.ERROR_MAPPING.get(self.get_status(data))
+        if status is None:
+            raise FailedPaymentError(self.get_status(data))
+        self.transaction.status = status
+        self.apply_to_transaction(data=data)
         self.transaction.last_verify = now()
         self.transaction.save()
 
     def send_verify_request(self) -> Response:
-        if not self.URLs.get('VERIFY'):
-            raise NotImplementedError("Define URLs['VERIFY'] or override .send_verify_request()")
+        if not self.URLS.get('VERIFY'):
+            raise NotImplementedError("Define URLS['VERIFY'] or override .send_verify_request()")
         data = self.get_verify_context()
-        return requests.post(self.URLs['VERIFY'], data=data, headers=self.get_headers(self.transaction.portal))
+        return requests.post(self.URLS['VERIFY'], json=data, headers=self.get_headers())
 
     def get_verify_context(self):
         return {
             self.API_KEY_NAME: self.transaction.portal.api_key,
-            self.TRANSACTION_ID_KEY_NAME: self.transaction.transaction_id,
-            'amount': self.transaction.amount,
-            'currency': self.transaction.currency,
+            self.TRANSACTION_ID_KEY_NAME: self.transaction.transaction_id
         }
 
     # ----------------------------------- END VERIFY -------------------------------------------
@@ -210,32 +226,48 @@ class BasePayPortalBackend:
         """
         if not self.ERROR_MAPPING:
             raise NotImplementedError
-        self.transaction.status = self.ERROR_MAPPING.get(response.json()['code'], StatusChoices.REFUND_FAILED)
+        self.transaction.status = self.ERROR_MAPPING.get(self.get_status(response.json()),
+                                                         StatusChoices.REFUND_FAILED)
         self.transaction.last_verify = now()
         self.transaction.save()
 
     def send_refund_request(self) -> Response:
-        if not self.URLs.get('REFUND'):
-            raise NotImplementedError("Define URLs['REFUND'] or override .send_refund_request()")
+        if not self.URLS.get('REFUND'):
+            raise NotImplementedError("Define URLS['REFUND'] or override .send_refund_request()")
         data = self.get_refund_context()
-        return requests.post(self.URLs['REFUND'], data=data, headers=self.get_headers(self.transaction.portal))
+        return requests.post(self.URLS['REFUND'], json=data, headers=self.get_headers())
 
     def get_refund_context(self):
-        raise NotImplementedError
+        return {}
 
     # ----------------------------------- END REFUND ------------------------------------------------
 
     # ------------------------------------- OTHER ---------------------------------------------------
 
     def get_redirect_url(self):
-        if not self.URLs.get('REDIRECT'):
-            raise NotImplementedError("Define URLs['REDIRECT'] or override .send_redirect_request()")
-        return self.URLs['REDIRECT'].format(transaction=self.transaction)
+        if not self.URLS.get('REDIRECT'):
+            raise NotImplementedError("Define URLS['REDIRECT'] or override .send_redirect_request()")
+        return self.URLS['REDIRECT'].format(transaction=self.transaction)
 
     @classmethod
     def get_transaction_from_query_params(cls, query_params: dict):
         return get_object_or_404(Transaction, transaction_id=query_params[cls.TRANSACTION_ID_KEY_NAME])
 
+    def get_headers(self):
+        pass
+
+    def apply_to_transaction(self, data: dict):
+        for flag in self.RECEIVING_FLAGS:
+            translated_flag = self.translate_flag(flag)
+            if translated_flag in data:
+                try:
+                    setattr(self.transaction, flag, data.get(translated_flag))
+                except AttributeError:
+                    pass
+
     @classmethod
-    def get_headers(cls, portal):
-        ...
+    def translate_flag(cls, flag):
+        return cls.TRANSLATE_DICTIONARY.get(flag) or flag
+
+    def get_status(self, data: dict):
+        return data.get(self.STATUS_FIELD)

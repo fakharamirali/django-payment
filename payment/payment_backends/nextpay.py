@@ -1,17 +1,12 @@
-from django.core.exceptions import ValidationError
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from requests import Response
 
-from .base import BasePayPortalBackend
+from .base import BaseBackend
 from ..decorator import register
-from ..models import Transaction
 from ..status import StatusChoices
-from ..validators import complete_card_number_regex
 
 
 @register
-class NextpayBackend(BasePayPortalBackend):
+class NextpayBackend(BaseBackend):
     name = _("Nextpay")
 
     URLs = {
@@ -32,46 +27,32 @@ class NextpayBackend(BasePayPortalBackend):
         -92: StatusChoices.REFUND_FAILED,
         -93: StatusChoices.REFUND_FAILED_BY_LACK_OF_FUNDS,
     }
+    TRANSLATE_DICTIONARY = BaseBackend.TRANSLATE_DICTIONARY | {
+        'shaparak_tracking_code': 'Shaparak_Ref_Id',
+        'phone': 'customer_phone',
+        'description': 'payer_desc'
+    }
+    REQUEST_FLAGS = [
+        'allowed_card',
+        'auto_verify',
+        'phone',
+        'description',
 
-    @classmethod
-    def get_create_context(cls, transaction: Transaction, **kwargs):
-        context = {}
-        if transaction.user:
-            # Get phone Number
-            if hasattr(transaction.user, "phone"):
+    ]
 
-                context['customer_phone'] = transaction.user.phone
-            elif hasattr(transaction.user, 'get_phone'):
-                phone = transaction.user.get_phone() if callable(
-                    transaction.user.get_phone) else transaction.user.get_phone
-                context['customer_phone'] = phone
-            # Get Name
-            context['payer_name'] = transaction.user.get_full_name()
-        if kwargs.get('auto_verify'):
-            context['auto_verify'] = kwargs['auto_verify']
-        if kwargs.get("allowed_card"):
-            if not complete_card_number_regex.match(kwargs['allowed_card']):
-                raise ValidationError(_("Enter Valid card number"))
-        return context
-
-    def handle_verify(self, response: Response):
-        data = response.json()
-        status = self.ERROR_MAPPING.get(data["code"])
-        if status is not None:
-            self.transaction.status = status
-        if status == StatusChoices.SUCCESSFUL:
-            self.transaction.card_holder = data['card_holder']
-            self.transaction.shaparak_tracking_code = data['Shaparak_Ref_Id']
-        self.transaction.last_verify = now()
-        self.transaction.save()
+    def get_verify_context(self):
+        return super().get_verify_context() | {
+            'amount': self.transaction.amount,
+            'currency': "IRR"
+        }
 
     def get_refund_context(self):
-        context = self.get_verify_context()
-        context['refund_request'] = 'yes_money_back'
-        return context
+        return self.get_verify_context() | {'refund_request': 'yes_money_back'}
 
-    @classmethod
-    def get_headers(cls, portal):
+    def get_headers(self):
         return {
             'User-Agent': 'PostmanRuntime/7.26.8',
         }
+
+    def get_create_context(self, **kwargs):
+        return super().get_create_context(**kwargs) | {'currency': 'IRR'}

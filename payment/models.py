@@ -1,21 +1,15 @@
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
-from django.core.validators import RegexValidator, StepValueValidator
+from django.core.validators import StepValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 
-from payment import globals, registry, signals
+from payment import globals, registry
 from payment.status import StatusChoices
 from payment.validators import card_holder_validator, number_only_validator
-
-
-class CurrencyChoices(models.TextChoices):
-    __empty__ = _("Not set Default")
-    IRR = "IRR", _("Rial")
-    IRT = "IRT", _("Toman")
 
 
 class PayPortalManager(models.Manager):
@@ -43,8 +37,6 @@ class PayPortal(models.Model):
     api_key = models.CharField(_("API Key"), max_length=255)
 
     order_id_prefix = models.SlugField(_("Order Prefix"), max_length=128)
-    default_currency = models.CharField(_("Default Currency"), choices=CurrencyChoices.choices, null=True,
-                                        blank=True, max_length=10, validators=(RegexValidator(r"^\w*$"),))
 
     def get_backend(self):
         return import_string(self.backend)
@@ -77,8 +69,6 @@ class Transaction(models.Model):
     linked_content_id = models.PositiveBigIntegerField(_("Linked Object Id"), null=True, blank=True)
     linked_content_object = GenericForeignKey('linked_contenttype', 'linked_content_id')
     amount = models.PositiveBigIntegerField(_("Amount"), validators=(StepValueValidator(1000),))
-    currency = models.CharField(_("Currency"), choices=CurrencyChoices.choices, max_length=10,
-                                validators=(RegexValidator(r"^\w*$"),))
     card_holder = models.CharField(_("Card Number"), max_length=19,
                                    validators=(card_holder_validator,))
     shaparak_tracking_code = models.CharField(_("Tracking Code"), max_length=12, validators=(number_only_validator,))
@@ -98,22 +88,8 @@ class Transaction(models.Model):
     def backend_controller(self):
         return self.portal.get_backend()(self)
 
-    def create(self, callback_uri, portal: PayPortal = None, **kwargs):
-        if portal is None:
-            if self.portal is None:
-                raise TypeError("You must set portal in the transaction instance or pass it to this function")
-            portal = self.portal
-        if self.currency is None:
-            if portal.default_currency is None:
-                raise TypeError("You must set a currency if you don't have default currency")
-            self.currency = portal.default_currency
-        self.portal = portal
-        signals.pre_create_transaction.send(sender=portal.get_backend(), transaction=self, callback_uri=callback_uri)
-        response = portal.get_backend().send_create_request(transaction=self, callback_uri=callback_uri, **kwargs)
-        portal.get_backend().handle_create(self, response)
-        signals.post_create_transaction.send(sender=portal.get_backend(), transaction=self, callback_uri=callback_uri,
-                                             response=response)
-        return self
+    def create(self, callback_uri, **kwargs):
+        self.backend_controller.create(callback_uri, **kwargs)
 
     def verify(self):
         self.backend_controller.verify_transaction()
@@ -125,7 +101,6 @@ class Transaction(models.Model):
 
     @classmethod
     def get_next_available_id(cls):
-
         max_id = globals.max_used_id_transaction
         return (max_id + 1) if max_id else 1
 

@@ -13,6 +13,10 @@ class StatusChoices(models.IntegerChoices):
     CANCELED_BY_USER = 4, _("Canceled By User")
     FAILED = 5, _("Failed")
     API_KEY_INVALID = 6, _("Api Key is invalid")
+    TRANSITION_ID_INVALID = 7, _("Transaction ID is invalid")
+    AMOUNT_INVALID = 8, _("Amount is invalid")
+    CARD_INVALID = 9, _("Card is invalid")
+    BALANCE_IS_NOT_ENOUGH_LIMIT = 10, _("Balance is not enough")
 
 
 # Uncontrolled failures
