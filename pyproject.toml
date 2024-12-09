@@ -1,17 +1,21 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.1.0", "wheel>=0.45.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "payment"
 dynamic = ['version']
+
 description = "This library created for django payment portal"
-readme = "README.md"  # Optional: If you have a README file
+dependencies = [
+    "django>=5.0",
+    "requests>=2"
+]
+readme = "README.md"
 authors = [
     { name = "Amirali Fakhar", email = "fakharamirali@gmail.com" }
 ]
 license = { text = "BSD 3-Clause License" }
-homepage = "https://github.com/fakharamirali/django-payment.git"
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -32,11 +36,16 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-[project.dependencies]
-django = ">=5.0"
-requests = ">=2"
-setuptools = "*"
-
 
 [tool.setuptools.dynamic]
 version = { attr = "payment.__version__" }
+
+[project.optional-dependencies]
+djangorestframework = ["djangorestframework>=3"]
+
+[project.urls]
+Repository = "https://github.com/fakharamirali/django-payment.git"
+Homepage = "https://github.com/fakharamirali/django-payment.git"
+
+[tool.setuptools.packages.find]
+include = ["payment*"]
