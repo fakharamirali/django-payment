@@ -1,12 +1,12 @@
 from django.utils.translation import gettext_lazy as _
 
-from .base import BasePayPortalBackend
+from .base import BaseBackend
 from ..decorator import register
 from ..status import StatusChoices
 
 
 @register
-class NextpayBackend(BasePayPortalBackend):
+class NextpayBackend(BaseBackend):
     name = _("Nextpay")
 
     URLs = {
@@ -27,7 +27,7 @@ class NextpayBackend(BasePayPortalBackend):
         -92: StatusChoices.REFUND_FAILED,
         -93: StatusChoices.REFUND_FAILED_BY_LACK_OF_FUNDS,
     }
-    TRANSLATE_DICTIONARY = BasePayPortalBackend.TRANSLATE_DICTIONARY | {
+    TRANSLATE_DICTIONARY = BaseBackend.TRANSLATE_DICTIONARY | {
         'shaparak_tracking_code': 'Shaparak_Ref_Id',
         'phone': 'customer_phone',
         'description': 'payer_desc'

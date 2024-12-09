@@ -1,11 +1,11 @@
 from payment import registry
-from payment.payment_backends import BasePayPortalBackend
+from payment.payment_backends import BaseBackend
 
 
 def register(backend_class):
-    if not issubclass(backend_class, BasePayPortalBackend):
+    if not issubclass(backend_class, BaseBackend):
         # Create a subclass of backend_class that inherits from BasePayPortalBackend
-        merged_class = type(backend_class.__name__, (BasePayPortalBackend, backend_class), {})
+        merged_class = type(backend_class.__name__, (BaseBackend, backend_class), {})
         merged_class.__module__ = backend_class.__module__
         backend_class = merged_class
 

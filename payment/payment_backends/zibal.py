@@ -2,11 +2,11 @@ from django.utils.translation import gettext_lazy as _
 
 from payment import status
 from payment.decorator import register
-from payment.payment_backends import BasePayPortalBackend
+from payment.payment_backends import BaseBackend
 
 
 @register
-class ZibalBackend(BasePayPortalBackend):
+class ZibalBackend(BaseBackend):
     name = _('Zibal')
     API_KEY_NAME = 'merchant'
     TRANSACTION_ID_KEY_NAME = "trackId"
@@ -39,7 +39,7 @@ class ZibalBackend(BasePayPortalBackend):
         114: status.StatusChoices.CANCELED
     }
 
-    TRANSLATE_DICTIONARY = BasePayPortalBackend.TRANSLATE_DICTIONARY | {
+    TRANSLATE_DICTIONARY = BaseBackend.TRANSLATE_DICTIONARY | {
         'phone': 'mobile',
         'allowed_card': 'allowedCards',
         'national_code': 'nationalCode',

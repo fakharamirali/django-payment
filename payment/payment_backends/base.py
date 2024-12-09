@@ -13,13 +13,13 @@ from payment.exceptions import FailedPaymentError
 from payment.models import Transaction
 from payment.status import FAIL_MESSAGES, HARD_FAILED_STATUSES, StatusChoices
 
-__all__ = ['BasePayPortalBackend']
+__all__ = ['BaseBackend']
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-class BasePayPortalBackend:
+class BaseBackend:
     @classmethod
     def support_refund(cls):
         return cls.URLS.get('REFUND') is not None
@@ -67,15 +67,16 @@ class BasePayPortalBackend:
 
     # ------------------------------------- CREATE ------------------------------------------------
 
-    def create(self, callback_url, **kwargs) -> None:
+    def create(self, callback_url, **kwargs) -> bool:
 
         signals.pre_create_transaction.send(self.__class__, transaction=self.transaction, callback_uri=callback_url)
         response = self.send_create_request(callback_url, **kwargs)
         if not response.ok:
             signals.create_transaction_failed.send(self.__class__, request=response, transaction=self.transaction)
-            raise FailedPaymentError
+            return False
         self.handle_create(response)
         signals.post_create_transaction.send(self.__class__, transaction=self.transaction)
+        return True
 
     def handle_create(self, response: Response):
         """
