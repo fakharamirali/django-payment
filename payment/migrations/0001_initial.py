@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 import payment.models
+from payment import status
 
 
 class Migration(migrations.Migration):
@@ -139,18 +140,7 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     models.SmallIntegerField(
-                        choices=[
-                            (-3, "Refund failed by lack of funds"),
-                            (-2, "Refund Failed"),
-                            (-1, "Refunded"),
-                            (0, "Successful"),
-                            (1, "Wait ..."),
-                            (2, "Canceled"),
-                            (3, "Wait for Bank"),
-                            (4, "Canceled By User"),
-                            (5, "Failed"),
-                            (6, "Api Key is invalid"),
-                        ],
+                        choices=status.StatusChoices.choices,
                         verbose_name="Status",
                     ),
                 ),
