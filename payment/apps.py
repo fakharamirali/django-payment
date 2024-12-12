@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import gettext_lazy as _
 
-from payment import registry
+from payment.registry import registry
 
 
 class PaymentConfig(AppConfig):

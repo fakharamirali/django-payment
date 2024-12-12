@@ -8,231 +8,233 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-21 19:11+0430\n"
+"POT-Creation-Date: 2024-12-12 09:09+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\payment\apps.py:11
+#: .\apps.py:12
 msgid "Payment"
 msgstr ""
 
-#: .\payment\models.py:16
-msgid "Not set Default"
+#: .\exceptions.py:6
+#, python-format
+msgid "An error occurred while processing your transaction (%s, %s)"
 msgstr ""
 
-#: .\payment\models.py:17
-msgid "Rial"
-msgstr ""
-
-#: .\payment\models.py:18
-msgid "Toman"
-msgstr ""
-
-#: .\payment\models.py:30 .\payment\models.py:69
+#: .\models.py:24 .\models.py:61
 msgid "Pay Portal"
 msgstr ""
 
-#: .\payment\models.py:31
+#: .\models.py:25
 msgid "Pay Portals"
 msgstr ""
 
-#: .\payment\models.py:34
+#: .\models.py:28
 msgid "Access secret data of pay portal"
 msgstr ""
 
-#: .\payment\models.py:39
+#: .\models.py:33
 msgid "Name"
 msgstr ""
 
-#: .\payment\models.py:40
+#: .\models.py:34
 msgid "Code Name"
 msgstr ""
 
-#: .\payment\models.py:40
+#: .\models.py:34
 msgid "This name use to access from code and don't show user"
 msgstr ""
 
-#: .\payment\models.py:42
+#: .\models.py:36
 msgid "Backend"
 msgstr ""
 
-#: .\payment\models.py:43
+#: .\models.py:37
 msgid "API Key"
 msgstr ""
 
-#: .\payment\models.py:45
+#: .\models.py:39
 msgid "Order Prefix"
 msgstr ""
 
-#: .\payment\models.py:46
-msgid "Default Currency"
-msgstr ""
-
-#: .\payment\models.py:55
+#: .\models.py:47
 msgid "Transaction"
 msgstr ""
 
-#: .\payment\models.py:56
+#: .\models.py:48
 msgid "Transactions"
 msgstr ""
 
-#: .\payment\models.py:62
+#: .\models.py:54
 msgid "Can Create a new Transaction"
 msgstr ""
 
-#: .\payment\models.py:63
+#: .\models.py:55
 msgid "Can verify a transaction with check"
 msgstr ""
 
-#: .\payment\models.py:64
+#: .\models.py:56
 msgid "Can set it paid without check"
 msgstr ""
 
-#: .\payment\models.py:65
+#: .\models.py:57
 msgid "Delete finished transactions"
 msgstr ""
 
-#: .\payment\models.py:66
+#: .\models.py:58
 msgid "Delete transactions"
 msgstr ""
 
-#: .\payment\models.py:70
+#: .\models.py:62
 msgid "Transaction ID"
 msgstr ""
 
-#: .\payment\models.py:71
+#: .\models.py:63
 msgid "Order ID"
 msgstr ""
 
-#: .\payment\models.py:74
+#: .\models.py:66
 msgid "User"
 msgstr ""
 
-#: .\payment\models.py:75
+#: .\models.py:67
 msgid "Linked Model"
 msgstr ""
 
-#: .\payment\models.py:77
+#: .\models.py:69
 msgid "Linked Object Id"
 msgstr ""
 
-#: .\payment\models.py:79
+#: .\models.py:71
 msgid "Amount"
 msgstr ""
 
-#: .\payment\models.py:80
-msgid "Currency"
-msgstr ""
-
-#: .\payment\models.py:82
+#: .\models.py:72
 msgid "Card Number"
 msgstr ""
 
-#: .\payment\models.py:84
+#: .\models.py:74
 msgid "Tracking Code"
 msgstr ""
 
-#: .\payment\models.py:85
+#: .\models.py:75
 msgid "Status"
 msgstr ""
 
-#: .\payment\models.py:86
+#: .\models.py:76
 msgid "Description"
 msgstr ""
 
-#: .\payment\models.py:87
+#: .\models.py:77
 msgid "Other Information"
 msgstr ""
 
-#: .\payment\models.py:90
+#: .\models.py:80
 msgid "Create Date"
 msgstr ""
 
-#: .\payment\models.py:91
+#: .\models.py:81
 msgid "Create on portal at"
 msgstr ""
 
-#: .\payment\models.py:92
+#: .\models.py:82
 msgid "Last verify"
 msgstr ""
 
-#: .\payment\models.py:93
+#: .\models.py:83
 msgid "Last Edit"
 msgstr ""
 
-#: .\payment\payment_apis\apps.py:8
+#: .\payment_apis\apps.py:11
 msgid "Payment APIs"
 msgstr ""
 
-#: .\payment\payment_backends\nextpay.py:15
+#: .\payment_backends\nextpay.py:10
 msgid "Nextpay"
 msgstr ""
 
-#: .\payment\payment_backends\nextpay.py:54
-msgid "Enter Valid card number"
+#: .\payment_backends\zibal.py:10
+msgid "Zibal"
 msgstr ""
 
-#: .\payment\status.py:6
-msgid "Refund failed by lake of funds"
+#: .\status.py:6
+msgid "Refund failed by lack of funds"
 msgstr ""
 
-#: .\payment\status.py:7
+#: .\status.py:7
 msgid "Refund Failed"
 msgstr ""
 
-#: .\payment\status.py:8
+#: .\status.py:8
 msgid "Refunded"
 msgstr ""
 
-#: .\payment\status.py:9
+#: .\status.py:9
 msgid "Successful"
 msgstr ""
 
-#: .\payment\status.py:10
+#: .\status.py:10
 msgid "Wait ..."
 msgstr ""
 
-#: .\payment\status.py:11
+#: .\status.py:11
 msgid "Canceled"
 msgstr ""
 
-#: .\payment\status.py:12
+#: .\status.py:12
 msgid "Wait for Bank"
 msgstr ""
 
-#: .\payment\status.py:13
+#: .\status.py:13
 msgid "Canceled By User"
 msgstr ""
 
-#: .\payment\status.py:14
+#: .\status.py:14
 msgid "Failed"
 msgstr ""
 
-#: .\payment\status.py:15
+#: .\status.py:15
 msgid "Api Key is invalid"
 msgstr ""
 
-#: .\payment\status.py:27
+#: .\status.py:16
+msgid "Transaction ID is invalid"
+msgstr ""
+
+#: .\status.py:17
+msgid "Amount is invalid"
+msgstr ""
+
+#: .\status.py:18
+msgid "Card is invalid"
+msgstr ""
+
+#: .\status.py:19
+msgid "Balance is not enough"
+msgstr ""
+
+#: .\status.py:31
 msgid "Unfortunately your pay request failed"
 msgstr ""
 
-#: .\payment\status.py:28
+#: .\status.py:32
 msgid "Unfortunately refund failed"
 msgstr ""
 
-#: .\payment\status.py:29
+#: .\status.py:33
 msgid "Refund failed by lack of funds in server"
 msgstr ""
 
-#: .\payment\status.py:30
+#: .\status.py:34
 msgid "API Key of portal is invalid"
 msgstr ""
 
-#: .\payment\validators.py:7
+#: .\validators.py:7
 msgid "This field only include number"
 msgstr ""
