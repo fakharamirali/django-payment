@@ -101,7 +101,8 @@ class BaseBackend:
                 self.transaction.delete()
             if self.transaction is None:
                 raise ValueError("Uncaught code")
-            raise FailedPaymentError(FAIL_MESSAGES[self.transaction.status])
+            raise FailedPaymentError(detail=FAIL_MESSAGES[self.transaction.status], status=self.transaction.status,
+                                     code=self.get_status(result))
         self.transaction.transaction_id = result[self.TRANSACTION_ID_KEY_NAME]
         self.transaction.save()
 
@@ -186,7 +187,7 @@ class BaseBackend:
         data: dict = response.json()
         status = self.ERROR_MAPPING.get(self.get_status(data))
         if status is None:
-            raise FailedPaymentError(self.get_status(data))
+            raise FailedPaymentError(code=self.get_status(data), status=status)
         self.transaction.status = status
         self.apply_to_transaction(data=data)
         self.transaction.last_verify = now()

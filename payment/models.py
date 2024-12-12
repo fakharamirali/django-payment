@@ -33,7 +33,7 @@ class PayPortal(models.Model):
     name = models.CharField(_("Name"), max_length=128)
     code_name = models.SlugField(_("Code Name"), help_text=_("This name use to access from code and don't show user"),
                                  max_length=50, primary_key=True)
-    backend = models.CharField(_("Backend"), max_length=512, choices=registry.get_choices)
+    backend = models.CharField(_("Backend"), max_length=512, choices=registry.registry.get_choices)
     api_key = models.CharField(_("API Key"), max_length=255)
 
     order_id_prefix = models.SlugField(_("Order Prefix"), max_length=128)
@@ -88,8 +88,8 @@ class Transaction(models.Model):
     def backend_controller(self):
         return self.portal.get_backend()(self)
 
-    def create(self, callback_uri, **kwargs):
-        self.backend_controller.create(callback_uri, **kwargs)
+    def create(self, callback_uri, **kwargs) -> bool:
+        return self.backend_controller.create(callback_uri, **kwargs)
 
     def verify(self):
         self.backend_controller.verify_transaction()
