@@ -1,6 +1,6 @@
 import logging
 
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
@@ -32,7 +32,7 @@ class TransactionViewSet(mixins.RetrieveModelMixin,
                 if hasattr(obj.linked_contenttype.model_class(), "on_transaction_successful") and callable(
                         obj.linked_contenttype.model_class().on_transaction_successful):
                     try:
-                        obj.linked_contenttype.model_class().on_transaction_successful(obj, request)
+                        obj.linked_contenttype.model_class().on_transaction_successful(transaction=obj, request=request)
                     except Exception as e:
                         logger.warning(str(e), exc_info=True)
 

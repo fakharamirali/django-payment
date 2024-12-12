@@ -8,231 +8,252 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-21 19:11+0430\n"
+"POT-Creation-Date: 2024-12-12 09:09+0330\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: AMIRALI FAKHAR <fakharamirali@gmail.com>\n"
 "Language-Team: Persian <info@trahelabbeyk.com>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\payment\apps.py:11
+#: .\apps.py:12
 msgid "Payment"
 msgstr "پرداخت"
 
-#: .\payment\models.py:16
-msgid "Not set Default"
-msgstr "پیش فرض تنظیم نشده"
+#: .\exceptions.py:6
+#, python-format
+msgid "An error occurred while processing your transaction (%s, %s)"
+msgstr "یک مشکل هنگام بررسی تراکنش شما رخ داد (%s, %s)"
 
-#: .\payment\models.py:17
-msgid "Rial"
-msgstr "ريال"
-
-#: .\payment\models.py:18
-msgid "Toman"
-msgstr "تومان"
-
-#: .\payment\models.py:30 .\payment\models.py:69
+#: .\models.py:24 .\models.py:61
 msgid "Pay Portal"
 msgstr "درگاه پرداخت"
 
-#: .\payment\models.py:31
+#: .\models.py:25
 msgid "Pay Portals"
 msgstr "درگاه های پرداخت"
 
-#: .\payment\models.py:34
+#: .\models.py:28
 msgid "Access secret data of pay portal"
 msgstr "دسترسی به اطلاعات امنیتی درگاه پرداخت"
 
-#: .\payment\models.py:39
+#: .\models.py:33
 msgid "Name"
 msgstr "نام"
 
-#: .\payment\models.py:40
+#: .\models.py:34
 msgid "Code Name"
 msgstr "کد"
 
-#: .\payment\models.py:40
+#: .\models.py:34
 msgid "This name use to access from code and don't show user"
-msgstr "این نام برای دسترسی در نرم افزار استفاده می شود و به کاربر نشان داده نمی شود"
+msgstr ""
+"این نام برای دسترسی در نرم افزار استفاده می شود و به کاربر نشان داده نمی شود"
 
-#: .\payment\models.py:42
+#: .\models.py:36
 msgid "Backend"
 msgstr "نوع درگاه"
 
-#: .\payment\models.py:43
+#: .\models.py:37
 msgid "API Key"
 msgstr "کلید API"
 
-#: .\payment\models.py:45
+#: .\models.py:39
 msgid "Order Prefix"
 msgstr "پیشوند سفارش"
 
-#: .\payment\models.py:46
-msgid "Default Currency"
-msgstr "واحد پولی پیش فرض"
-
-#: .\payment\models.py:55
+#: .\models.py:47
 msgid "Transaction"
 msgstr "تراکنش"
 
-#: .\payment\models.py:56
+#: .\models.py:48
 msgid "Transactions"
 msgstr "تراکنش ها"
 
-#: .\payment\models.py:62
+#: .\models.py:54
 msgid "Can Create a new Transaction"
 msgstr "آیا می تواند یک تراکنش بسازد"
 
-#: .\payment\models.py:63
+#: .\models.py:55
 msgid "Can verify a transaction with check"
 msgstr "آیا می تواند تراکنش را مجددا بررسی کند"
 
-#: .\payment\models.py:64
+#: .\models.py:56
 msgid "Can set it paid without check"
 msgstr "می تواند پرداخت شده تنظیم کند بدون بررسی"
 
-#: .\payment\models.py:65
+#: .\models.py:57
 msgid "Delete finished transactions"
 msgstr "حذف تراکنش های تکمیل شده"
 
-#: .\payment\models.py:66
+#: .\models.py:58
 msgid "Delete transactions"
 msgstr "حذف تراکنش ها"
 
-#: .\payment\models.py:70
+#: .\models.py:62
 msgid "Transaction ID"
 msgstr "کلید تراکنش"
 
-#: .\payment\models.py:71
+#: .\models.py:63
 msgid "Order ID"
 msgstr "کلید سفارش"
 
-#: .\payment\models.py:74
+#: .\models.py:66
 msgid "User"
 msgstr "کاربر"
 
-#: .\payment\models.py:75
+#: .\models.py:67
 msgid "Linked Model"
 msgstr "مدل لینک شده"
 
-#: .\payment\models.py:77
+#: .\models.py:69
 msgid "Linked Object Id"
 msgstr "کلید شی لینک شده"
 
-#: .\payment\models.py:79
+#: .\models.py:71
 msgid "Amount"
 msgstr "قیمت"
 
-#: .\payment\models.py:80
-msgid "Currency"
-msgstr "واحد پولی"
-
-#: .\payment\models.py:82
+#: .\models.py:72
 msgid "Card Number"
 msgstr "شماره کارت"
 
-#: .\payment\models.py:84
+#: .\models.py:74
 msgid "Tracking Code"
 msgstr "کد پیگیری"
 
-#: .\payment\models.py:85
+#: .\models.py:75
 msgid "Status"
 msgstr "وضعیت"
 
-#: .\payment\models.py:86
+#: .\models.py:76
 msgid "Description"
 msgstr "توضیحات"
 
-#: .\payment\models.py:87
+#: .\models.py:77
 msgid "Other Information"
 msgstr "اطلاعات دیگر"
 
-#: .\payment\models.py:90
+#: .\models.py:80
 msgid "Create Date"
 msgstr "تاریخ ساخت"
 
-#: .\payment\models.py:91
+#: .\models.py:81
 msgid "Create on portal at"
 msgstr "ساخته شده در درگاه در"
 
-#: .\payment\models.py:92
+#: .\models.py:82
 msgid "Last verify"
 msgstr "آخرین بررسی"
 
-#: .\payment\models.py:93
+#: .\models.py:83
 msgid "Last Edit"
 msgstr "آخرین ویرایش"
 
-#: .\payment\payment_apis\apps.py:8
+#: .\payment_apis\apps.py:11
 msgid "Payment APIs"
 msgstr "API های پرداخت"
 
-#: .\payment\payment_backends\nextpay.py:15
+#: .\payment_backends\nextpay.py:10
 msgid "Nextpay"
 msgstr "نکست پی"
 
-#: .\payment\payment_backends\nextpay.py:54
-msgid "Enter Valid card number"
-msgstr "یک شماره کارت معتبر وارد کنید"
+#: .\payment_backends\zibal.py:10
+msgid "Zibal"
+msgstr "زیبال"
 
-#: .\payment\status.py:6
+#: .\status.py:6
 msgid "Refund failed by lack of funds"
 msgstr "استرداد وجه به دلیل کمبود بودجه با شکست مواجه شد"
 
-#: .\payment\status.py:7
+#: .\status.py:7
 msgid "Refund Failed"
 msgstr "استرداد وجه با شکست مواجه شد"
 
-#: .\payment\status.py:8
+#: .\status.py:8
 msgid "Refunded"
 msgstr "استرداد شده"
 
-#: .\payment\status.py:9
+#: .\status.py:9
 msgid "Successful"
 msgstr "موفقیت آمیز"
 
-#: .\payment\status.py:10
+#: .\status.py:10
 msgid "Wait ..."
 msgstr "در انتظار ..."
 
-#: .\payment\status.py:11
+#: .\status.py:11
 msgid "Canceled"
 msgstr "لغو شده"
 
-#: .\payment\status.py:12
+#: .\status.py:12
 msgid "Wait for Bank"
 msgstr "در انتظار بانک"
 
-#: .\payment\status.py:13
+#: .\status.py:13
 msgid "Canceled By User"
 msgstr "لغو شده توسط کاربر"
 
-#: .\payment\status.py:14
+#: .\status.py:14
 msgid "Failed"
 msgstr "شکست خورده"
 
-#: .\payment\status.py:15
+#: .\status.py:15
 msgid "Api Key is invalid"
 msgstr "کلید API نامعتبر است"
 
-#: .\payment\status.py:27
+#: .\status.py:16
+msgid "Transaction ID is invalid"
+msgstr "کلید تراکنش نامعتبر است"
+
+#: .\status.py:17
+msgid "Amount is invalid"
+msgstr "قیمت نامعتبر است"
+
+#: .\status.py:18
+msgid "Card is invalid"
+msgstr "شماره کارت نامعتبر است"
+
+#: .\status.py:19
+msgid "Balance is not enough"
+msgstr "موجودی کافی نیست"
+
+#: .\status.py:31
 msgid "Unfortunately your pay request failed"
 msgstr "متأسفانه درخواست پرداخت شما با شکست رو به رو شد"
 
-#: .\payment\status.py:28
+#: .\status.py:32
 msgid "Unfortunately refund failed"
 msgstr "متاسفانه استرداد وجه با شکست مواجه شد"
 
-#: .\payment\status.py:29
+#: .\status.py:33
 msgid "Refund failed by lack of funds in server"
 msgstr "استرداد وجه به دلیل کمبود وجه در سرور با شکست مواجه شد"
 
-#: .\payment\status.py:30
+#: .\status.py:34
 msgid "API Key of portal is invalid"
 msgstr "کلید API درگاه نامعتبر است"
 
-#: .\payment\validators.py:7
+#: .\validators.py:7
 msgid "This field only include number"
 msgstr "این فیلد فقط باید شامل عدد باشد"
+
+#~ msgid "Not set Default"
+#~ msgstr "پیش فرض تنظیم نشده"
+
+#~ msgid "Rial"
+#~ msgstr "ريال"
+
+#~ msgid "Toman"
+#~ msgstr "تومان"
+
+#~ msgid "Default Currency"
+#~ msgstr "واحد پولی پیش فرض"
+
+#~ msgid "Currency"
+#~ msgstr "واحد پولی"
+
+#~ msgid "Enter Valid card number"
+#~ msgstr "یک شماره کارت معتبر وارد کنید"

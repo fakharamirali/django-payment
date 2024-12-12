@@ -1,5 +1,5 @@
-from payment import registry
 from payment.payment_backends import BaseBackend
+from payment.registry import registry
 
 
 def register(backend_class):
