@@ -16,7 +16,7 @@ class PayPortalManager(models.Manager):
     use_in_migrations = True
 
     def get_by_natural_key(self, code_name):
-        self.get(code_name=code_name)
+        return self.get(code_name=code_name)
 
 
 class PayPortal(models.Model):
@@ -25,7 +25,7 @@ class PayPortal(models.Model):
         verbose_name_plural = _("Pay Portals")
 
         permissions = [
-            ("secret", _("Access secret data of pay portal")),
+            ("secret_payportal", _("Access secret data of pay portal")),
         ]
 
     objects = PayPortalManager()
@@ -51,11 +51,11 @@ class Transaction(models.Model):
                                     name="transaction_unique"),
         )
         default_permissions = [
-            ("create", _("Can Create a new Transaction")),
-            ("verify", _("Can verify a transaction with check")),
-            ("force_pay", _("Can set it paid without check")),
-            ("delete_finished", _("Delete finished transactions")),
-            ("delete_force_all", _("Delete transactions"))
+            "create",
+            "verify",
+            "force_pay",
+            "delete_finished",
+            "delete_force_all",
         ]
 
     portal = models.ForeignKey('PayPortal', models.RESTRICT, verbose_name=_("Pay Portal"))  # TODO: SET DEFAULT
@@ -89,13 +89,13 @@ class Transaction(models.Model):
         return self.portal.get_backend()(self)
 
     def create(self, callback_uri, **kwargs) -> bool:
-        return self.backend_controller.create(callback_uri, **kwargs)
+        return self.backend_controller.create(callback_uri)
 
     def verify(self):
-        self.backend_controller.verify_transaction()
+        self.backend_controller.verify()
 
     def refund(self):
-        self.backend_controller.refund_transaction()
+        self.backend_controller.refund()
 
     # Other
 
