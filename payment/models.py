@@ -3,6 +3,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.validators import StepValueValidator
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Now
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
@@ -77,7 +78,7 @@ class Transaction(models.Model):
     other = models.JSONField(_("Other Information"), null=True, blank=True)
 
     # Important Times
-    create_date = models.DateTimeField(_("Create Date"), auto_now_add=True)
+    create_date = models.DateTimeField(_("Create Date"), auto_now_add=True, db_default=Now())
     create_transaction_at = models.DateTimeField(_("Create on portal at"), null=True)
     last_verify = models.DateTimeField(_("Last verify"), null=True)
     last_edit = models.DateTimeField(_("Last Edit"), auto_now=True)
