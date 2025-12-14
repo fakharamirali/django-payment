@@ -15,7 +15,7 @@ class ZibalBackend(BaseRequestBackend):
         return data.get('status') or data.get('result')
 
     URLS = {
-        "CREATE": "https://gateway.zibal.ir/request/lazy",
+        "CREATE": "https://gateway.zibal.ir/request",
         "AUTO_VERIFY_CREATE": "https://gateway.zibal.ir/v1/request",
         "VERIFY": "https://gateway.zibal.ir/v1/verify",
         "REDIRECT": "https://gateway.zibal.ir/start/{transaction.transaction_id}"
